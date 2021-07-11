@@ -44,12 +44,12 @@ module.exports.deleteCard = (req, res) => {
 };
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.cardId,
+  req.params._id,
   { $addToSet: { likes: req.user._id } },
   { new: true },
 )
-  .then((likes, card) => {
-    if (!card) {
+  .then((likes) => {
+    if (!likes) {
       return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
     }
     return res.status(200).send(likes);
@@ -63,12 +63,12 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   });
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.cardId,
+  req.params._id,
   { $pull: { likes: req.user._id } },
   { new: true },
 )
-  .then((likes, card) => {
-    if (!card) {
+  .then((likes) => {
+    if (!likes) {
       return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
     }
     return res.status(200).send(likes);
