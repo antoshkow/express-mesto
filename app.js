@@ -1,14 +1,26 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const { Joi, celebrate, errors } = require('celebrate');
+const helmet = require('helmet');
+const { errors } = require('celebrate');
+const rateLimit = require('express-rate-limit');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const router = require('./routes/router');
+const NotFoundError = require('./errors/NotFoundError');
+const errorHandler = require('./middlewares/errorHandler');
+const { signinValidation, signupValidation } = require('./middlewares/validation');
 
 const app = express();
 
 const { PORT = 3000 } = process.env;
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -18,47 +30,36 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(cors());
+app.use(helmet());
+app.use(limiter);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Роуты, не требующие авторизации
 app.post(
   '/signin',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required().min(5),
-    }),
-  }),
+  signinValidation,
   login,
 );
 
 app.post(
   '/signup',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required().min(5),
-    }),
-  }),
+  signupValidation,
   createUser,
 );
 
 // Роуты, требующие авторизация
-app.use('/cards', auth, require('./routes/cards'));
-app.use('/users', auth, require('./routes/users'));
+app.use('/', auth, router);
 
+app.use((req, res, next) => {
+  next(new NotFoundError('Страницы не существует'));
+});
+
+// Обработка ошибок
 app.use(errors());
 
-app.use('/', router);
-
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const { message } = err;
-
-  res.status(statusCode).send({ message });
-  next();
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

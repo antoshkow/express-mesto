@@ -14,7 +14,7 @@
 3. Запуск проекта
 - <code>npm run start</code> — запускает сервер
 - <code>npm run dev</code> — запускает сервер с hot-reload
-- <code>npm run lint .</code> — запускает линтер для проверки проекта на ошибки
+- <code>npm run lint</code> — запускает линтер для проверки проекта на ошибки
 
 3. Применяемые технологии:
   - Node.js

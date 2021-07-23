@@ -5,6 +5,8 @@ const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .orFail(() => {
@@ -30,6 +32,8 @@ module.exports.getUser = (req, res, next) => {
       if (err.name === 'CastError') {
         const error = new BadRequestError('Переданы некорректные данные');
         next(error);
+      } else {
+        next(err);
       }
     });
 };
@@ -64,6 +68,8 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         const error = new BadRequestError('Переданы некорректные данные');
         next(error);
+      } else {
+        next(err);
       }
     });
 };
@@ -85,6 +91,8 @@ module.exports.updateUser = (req, res, next) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         const error = new BadRequestError('Переданы некорректные данные');
         next(error);
+      } else {
+        next(err);
       }
     });
 };
@@ -106,6 +114,8 @@ module.exports.updateAvatar = (req, res, next) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         const error = new BadRequestError('Переданы некорректные данные');
         next(error);
+      } else {
+        next(err);
       }
     });
 };
@@ -128,9 +138,15 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
+
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: true,
+      });
 
       res.send({ token });
     })

@@ -2,20 +2,22 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const NotFoundError = require('../errors/NotFoundError');
-const ConflictError = require('../errors/ConflictError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     default: 'Жак-Ив Кусто',
     minlength: 2,
-    maxlength: 30,
+    maxlength: 40,
+    required: false,
   },
   about: {
     type: String,
     default: 'Исследователь',
     minlength: 2,
-    maxlength: 30,
+    maxlength: 200,
+    required: false,
   },
   avatar: {
     type: String,
@@ -25,6 +27,7 @@ const userSchema = new mongoose.Schema({
         return /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/.test(v);
       },
       message: 'Некорректная ссылка',
+      required: false,
     },
   },
   email: {
@@ -53,7 +56,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            throw new ConflictError('Неправильные почта или пароль');
+            throw new UnauthorizedError('Неправильная почта или пароль');
           }
           return user;
         });
