@@ -1,11 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
+const { Joi, celebrate, errors } = require('celebrate');
+const { createUser, login } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const router = require('./routes/router');
 
 const app = express();
 
 const { PORT = 3000 } = process.env;
-
-const router = require('./routes/router');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -14,20 +17,47 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '60e7574b657a2d1b10c7f4a3',
-  };
+// Роуты, не требующие авторизации
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(5),
+    }),
+  }),
+  login,
+);
 
-  next();
-});
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(5),
+    }),
+  }),
+  createUser,
+);
+
+// Роуты, требующие авторизация
+app.use('/cards', auth, require('./routes/cards'));
+app.use('/users', auth, require('./routes/users'));
+
+app.use(errors());
 
 app.use('/', router);
-app.use((req, res) => {
-  res.status(404).send({ message: 'Такой страницы не существует' });
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const { message } = err;
+
+  res.status(statusCode).send({ message });
+  next();
 });
 
 app.listen(PORT, () => {
