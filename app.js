@@ -12,6 +12,7 @@ const router = require('./routes/router');
 const NotFoundError = require('./errors/NotFoundError');
 const errorHandler = require('./middlewares/errorHandler');
 const { signinValidation, signupValidation } = require('./middlewares/validation');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
@@ -36,6 +37,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(requestLogger);
+
 // Роуты, не требующие авторизации
 app.post(
   '/signin',
@@ -55,6 +58,8 @@ app.use('/', auth, router);
 app.use((req, res, next) => {
   next(new NotFoundError('Страницы не существует'));
 });
+
+app.use(errorLogger);
 
 // Обработка ошибок
 app.use(errors());
