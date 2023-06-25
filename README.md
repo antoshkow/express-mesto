@@ -1,24 +1,25 @@
-# Сервер проекта "Место"
+# Back-end for "Mesto"
 
-## Проектная работа 4
+## Project work 4.
 
-1. Проектная работа "Место (back-end)" (спринт 13-15).
+1. Project work "Mesto (back-end)" (sprint 13-15).
 
-2. Директории
-- <code>/public</code> — статика, полученная в результате билда фронтенд-приложения на Реакте
-- <code>/routes</code> — папка с файлами роутера
-- <code>/controllers</code> - папка с контролерами
-- <code>/models</code> - папка со схемами БД
-- Остальные директории вспомогательные, создаются при необходимости разработчиком
+2. directories
+- <code>/public</code> — statics obtained as a result of building a front-end application in React;
+- <code>/routes</code> — router file folder;
+- <code>/controllers</code> - folder with controllers;
+- <code>/models</code> - database schema folder;
+- The remaining directories are auxiliary, created if necessary by the developer.
 
-3. Запуск проекта
-- <code>npm run start</code> — запускает сервер
-- <code>npm run dev</code> — запускает сервер с hot-reload
-- <code>npm run lint</code> — запускает линтер для проверки проекта на ошибки
+3. Launch of the project
+- <code>npm run start</code> — start the server;
+- <code>npm run dev</code> — start the server with hot-reload;
+- <code>npm run lint</code> — runs a linter to check the project for errors.
 
-3. Применяемые технологии:
-  - Node.js
-  - express.js
-  - MongoDB
 
-4. Системные требования: язык JavaScript; web-браузер (браузер автора - Opera); фреймворк - express; расширения: Node.js, mongoDB, mongoDB Compass
+3. Stack:
+  - Node.js;
+  - express.js;
+  - MongoDB.
+
+4. System preferences: Node.js (v.15); web-browser (dev browser – Opera); framework – express; extensions: Node.js, mongoDB, mongoDB Compass.
